@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Volúmenes 3D - UTEZ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .utez-header {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(138, 43, 226, 0.9);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin-top: 80px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .figures-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .figure-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .figure-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .figure-card.active {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .figure-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .figure-name {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .input-section.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-calculate {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-calculate:hover {
+            transform: scale(1.05);
+        }
+
+        .result-container {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-container.active {
+            display: block;
+        }
+
+        .result-text {
+            font-size: 1.3em;
+            color: #1976d2;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        #canvas-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            height: 600px;
+            position: relative;
+            display: none;
+        }
+
+        #canvas-container.active {
+            display: block;
+        }
+
+        #three-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .volume-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .figures-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            #canvas-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="utez-header">UTEZ</div>
+
+    <div class="container">
+        <h1>🔷 Calculadora de Volúmenes y Figuras 3D 🔷</h1>
+
+        <div class="menu-container">
+            <div class="figures-grid">
+                <div class="figure-card" data-figure="esfera">
+                    <div class="figure-icon">🔵</div>
+                    <div class="figure-name">Esfera</div>
+                </div>
+                <div class="figure-card" data-figure="cubo">
+                    <div class="figure-icon">🟧</div>
+                    <div class="figure-name">Cubo</div>
+                </div>
+                <div class="figure-card" data-figure="cilindro">
+                    <div class="figure-icon">🟢</div>
+                    <div class="figure-name">Cilindro</div>
+                </div>
+                <div class="figure-card" data-figure="cono">
+                    <div class="figure-icon">🟣</div>
+                    <div class="figure-name">Cono</div>
+                </div>
+                <div class="figure-card" data-figure="piramide">
+                    <div class="figure-icon">🟡</div>
+                    <div class="figure-name">Pirámide</div>
+                </div>
+            </div>
+
+            <!-- Inputs para Esfera -->
+            <div class="input-section" id="input-esfera">
+                <h3>📊 Esfera</h3>
+                <div class="input-group">
+                    <label for="radio-esfera">Radio:</label>
+                    <input type="number" id="radio-esfera" placeholder="Ingrese el radio" step="0.1" min="0.1">
+                </div>
+                <button class="btn-calculate" onclick="calcularVolumen('esfera')">Calcular y Visualizar</button>
+                <div class="error-message" id="error-esfera"></div>
+            </div>
+
+            <!-- Inputs para Cubo -->
+            <div class="input-section" id="input-cubo">
+                <h3>📊 Cubo</h3>
+                <div class="input-group">
+                    <label for="lado-cubo">Lado:</label>
+                    <input type="number" id="lado-cubo" placeholder="Ingrese el lado" step="0.1" min="0.1">
+                </div>
+                <button class="btn-calculate" onclick="calcularVolumen('cubo')">Calcular y Visualizar</button>
+                <div class="error-message" id="error-cubo"></div>
+            </div>
+
+            <!-- Inputs para Cilindro -->
+            <div class="input-section" id="input-cilindro">
+                <h3>📊 Cilindro</h3>
+                <div class="input-group">
+                    <label for="radio-cilindro">Radio:</label>
+                    <input type="number" id="radio-cilindro" placeholder="Ingrese el radio" step="0.1" min="0.1">
+                </div>
+                <div class="input-group">
+                    <label for="altura-cilindro">Altura:</label>
+                    <input type="number" id="altura-cilindro" placeholder="Ingrese la altura" step="0.1" min="0.1">
+                </div>
+                <button class="btn-calculate" onclick="calcularVolumen('cilindro')">Calcular y Visualizar</button>
+                <div class="error-message" id="error-cilindro"></div>
+            </div>
+
+            <!-- Inputs para Cono -->
+            <div class="input-section" id="input-cono">
+                <h3>📊 Cono</h3>
+                <div class="input-group">
+                    <label for="radio-cono">Radio:</label>
+                    <input type="number" id="radio-cono" placeholder="Ingrese el radio" step="0.1" min="0.1">
+                </div>
+                <div class="input-group">
+                    <label for="altura-cono">Altura:</label>
+                    <input type="number" id="altura-cono" placeholder="Ingrese la altura" step="0.1" min="0.1">
+                </div>
+                <button class="btn-calculate" onclick="calcularVolumen('cono')">Calcular y Visualizar</button>
+                <div class="error-message" id="error-cono"></div>
+            </div>
+
+            <!-- Inputs para Pirámide -->
+            <div class="input-section" id="input-piramide">
+                <h3>📊 Pirámide Cuadrada</h3>
+                <div class="input-group">
+                    <label for="base-piramide">Base:</label>
+                    <input type="number" id="base-piramide" placeholder="Ingrese el lado de la base" step="0.1" min="0.1">
+                </div>
+                <div class="input-group">
+                    <label for="altura-piramide">Altura:</label>
+                    <input type="number" id="altura-piramide" placeholder="Ingrese la altura" step="0.1" min="0.1">
+                </div>
+                <button class="btn-calculate" onclick="calcularVolumen('piramide')">Calcular y Visualizar</button>
+                <div class="error-message" id="error-piramide"></div>
+            </div>
+
+            <div class="result-container" id="result-container">
+                <div class="result-text" id="result-text"></div>
+            </div>
+        </div>
+
+        <div id="canvas-container">
+            <div class="volume-display" id="volume-display"></div>
+            <div id="three-canvas"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
